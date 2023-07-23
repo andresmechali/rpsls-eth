@@ -1,8 +1,10 @@
 "use client";
 
-import { useAddress } from "@thirdweb-dev/react";
+import { useAddress, useWallet } from "@thirdweb-dev/react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { isValidAddress } from "ethereumjs-util";
+import { useRouter } from "next/navigation";
+import { createGame } from "@/utils";
 
 enum Move {
   rock = "Rock",
@@ -13,25 +15,47 @@ enum Move {
 }
 
 type Inputs = {
-  address: string;
+  opponent: string;
   move: Move;
   stake: number;
 };
 
 export default function Home() {
   const ownAddress = useAddress();
+  const router = useRouter();
+  const wallet = useWallet();
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isValid },
+    formState: { errors, isValid, isSubmitting },
     setError,
   } = useForm<Inputs>({
     mode: "onSubmit",
     reValidateMode: "onChange",
-    defaultValues: { address: "", move: Move.rock, stake: 0.01 },
+    defaultValues: {
+      opponent: "0x8b7E9A21B92196F72722dbFeDb1406F86E737061",
+      move: Move.rock,
+      stake: 0.001,
+    },
   });
-  const onSubmit: SubmitHandler<Inputs> = (data) => {
-    console.log("submit:", data);
+
+  const onSubmit: SubmitHandler<Inputs> = async (data) => {
+    // TODO: Validate
+    const { opponent, stake, move } = data;
+
+    if (ownAddress) {
+      // Create game and get contract address
+      const contractAddress = await createGame({
+        ownAddress,
+        opponent,
+        move,
+        stake: stake.toString(),
+      });
+
+      // Redirect to game page
+      router.push(`/${contractAddress}`);
+    }
   };
 
   return (
@@ -39,9 +63,9 @@ export default function Home() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="mb-10">
           <label
-            htmlFor="address"
+            htmlFor="opponent"
             className={`block mb-2 text-sm font-medium ${
-              errors.address ? "text-red-700" : "text-white"
+              errors.opponent ? "text-red-700" : "text-white"
             }`}
           >
             Opponent&apos;s address
@@ -49,7 +73,7 @@ export default function Home() {
           <input
             id="address"
             className="border text-sm rounded-lg block w-full p-2.5 bg-gray-700 border-gray-800 placeholder-gray-400 text-white focus:ring-gray-500 focus:border-gray-500"
-            {...register("address", {
+            {...register("opponent", {
               required: {
                 value: true,
                 message: "Opponent's address is required.",
@@ -57,11 +81,11 @@ export default function Home() {
               validate: (value) =>
                 isValidAddress(value) && ownAddress !== value,
             })}
-            aria-invalid={!!errors.address}
+            aria-invalid={!!errors.opponent}
           />
-          {errors.address && (
+          {errors.opponent && (
             <p className="mt-2 text-sm text-red-600 absolute">
-              {errors.address.message || "Invalid or own address."}
+              {errors.opponent.message || "Invalid or own address."}
             </p>
           )}
         </div>
@@ -119,7 +143,7 @@ export default function Home() {
               min: 0.001,
               max: 10,
             })}
-            aria-invalid={!!errors.address}
+            aria-invalid={!!errors.stake}
           />
           {errors.stake && (
             <p className="mt-2 text-sm text-red-600 absolute">
@@ -128,7 +152,7 @@ export default function Home() {
           )}
         </div>
         <button className="w-full rounded-lg bg-gray-800 p-4 hover:bg-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-800">
-          Create game
+          {isSubmitting ? "Creating..." : "Create game"}
         </button>
       </form>
     </section>
