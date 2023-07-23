@@ -1,6 +1,6 @@
 export default function Footer() {
   return (
-    <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
+    <div className="mb-16 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
       <a
         href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
         className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-neutral-700 hover:bg-neutral-800/30"

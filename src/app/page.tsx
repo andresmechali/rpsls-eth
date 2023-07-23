@@ -1,41 +1,32 @@
 "use client";
 
-import { useAddress, useWallet } from "@thirdweb-dev/react";
+import { useAddress } from "@thirdweb-dev/react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { isValidAddress } from "ethereumjs-util";
 import { useRouter } from "next/navigation";
 import { createGame } from "@/utils";
-
-enum Move {
-  rock = "Rock",
-  paper = "Paper",
-  scissors = "Scissors",
-  lizard = "Lizard",
-  spock = "Spock",
-}
+import { Move, MoveOptions } from "@/types";
 
 type Inputs = {
   opponent: string;
-  move: Move;
+  move: MoveOptions;
   stake: number;
 };
 
 export default function Home() {
   const ownAddress = useAddress();
   const router = useRouter();
-  const wallet = useWallet();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isValid, isSubmitting },
-    setError,
   } = useForm<Inputs>({
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: {
       opponent: "0x8b7E9A21B92196F72722dbFeDb1406F86E737061",
-      move: Move.rock,
+      move: 0,
       stake: 0.001,
     },
   });
@@ -109,9 +100,9 @@ export default function Home() {
             })}
             aria-invalid={!!errors.move}
           >
-            {Object.values(Move).map((move) => (
-              <option key={move} value={move}>
-                {move}
+            {Object.values(Move).map((label, idx) => (
+              <option key={label} value={idx + 1}>
+                {label}
               </option>
             ))}
           </select>
@@ -151,7 +142,10 @@ export default function Home() {
             </p>
           )}
         </div>
-        <button className="w-full rounded-lg bg-gray-800 p-4 hover:bg-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-800">
+        <button
+          className="w-full rounded-lg bg-gray-800 p-4 hover:bg-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-800"
+          disabled={isSubmitting}
+        >
           {isSubmitting ? "Creating..." : "Create game"}
         </button>
       </form>

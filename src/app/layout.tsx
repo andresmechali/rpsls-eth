@@ -17,7 +17,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <ThirdwebProvider theme="dark" activeChain={Sepolia}>
-          <main className="flex min-h-screen flex-col items-center p-24 max-w-[1500px] ml-auto mr-auto">
+          <main className="flex min-h-screen flex-col items-center p-16 max-w-[1500px] ml-auto mr-auto">
             <Navbar />
             {children}
           </main>
