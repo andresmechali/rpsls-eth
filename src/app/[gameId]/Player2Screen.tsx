@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Address, parseEther } from "viem";
 import { useParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
+import { Badge } from "flowbite-react";
+import toast from "react-hot-toast";
 import { useAddress } from "@thirdweb-dev/react";
 import { Move, MoveOptions } from "@/types";
 import { publicClient, walletClient } from "@/utils";
@@ -19,6 +21,8 @@ export default function Player2Screen({ stake }: { stake: number }) {
   useEffect(() => {
     (async () => {
       if (gameId) {
+        console.log("asddasads");
+        toast.success("asd");
         const c2 = (await publicClient.readContract({
           address: gameId as Address,
           abi: rpsContract.abi,
@@ -79,10 +83,10 @@ export default function Player2Screen({ stake }: { stake: number }) {
     return (
       <div>
         You already chose{" "}
-        <kbd className="px-2 py-1.5 text-xs font-semibold border rounded-lg bg-gray-600 text-gray-100 border-gray-500">
-          {Object.keys(Move)[playerMove - 1]}
-        </kbd>
-        . Waiting for player 1 to finish the game.
+        <Badge color="info">{Object.keys(Move)[playerMove - 1]}</Badge>
+        {/*<kbd className="px-2 py-1.5 text-xs font-semibold border rounded-lg bg-gray-600 text-gray-100 border-gray-500">*/}
+        {/*  {Object.keys(Move)[playerMove - 1]}*/}
+        {/*</kbd>*/}. Waiting for player 1 to finish the game.
       </div>
     );
   }

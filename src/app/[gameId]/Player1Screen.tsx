@@ -4,12 +4,14 @@ import { useParams } from "next/navigation";
 import { useAddress } from "@thirdweb-dev/react";
 import { publicClient, walletClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
+import toast, { Toaster } from "react-hot-toast";
 
 export default function Player1Screen() {
   const [player2Move, setPlayer2Move] = useState<number>();
   const [isSolving, setIsSolving] = useState<boolean>(false);
   const ownAddress = useAddress();
   const { gameId } = useParams();
+  const [isFinished, setIsFinished] = useState<boolean>(false);
 
   useEffect(() => {
     // TODO: turn into hook
@@ -47,19 +49,31 @@ export default function Player1Screen() {
           hash: txHash,
         });
 
-        console.log("-----RES-------");
         console.log({ receipt });
+        setIsFinished(true);
+        toast.success("Game finished successfully!");
       }
     } catch (e) {
       console.log(e);
+      toast.error("There was an error solving the game.");
       // TODO: handle error
     } finally {
       setIsSolving(false);
     }
   };
 
+  if (isFinished) {
+    return (
+      <div>
+        Game finished. TODO: instead of this, the stake should be updated to 0
+        and this screen should not be rendered.
+      </div>
+    );
+  }
+
   return (
     <section className="h-full flex flex-col justify-center w-[512px]">
+      <Toaster />
       {!player2Move ? (
         <p>Waiting for player 2</p>
       ) : (
