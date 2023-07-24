@@ -11,7 +11,7 @@ import {
 import rpsContract from "@/contracts/RPS.json";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { Spinner } from "flowbite-react";
+import { Badge, Spinner } from "flowbite-react";
 import GameScreen from "@/app/[gameId]/GameScreen";
 import { useContract } from "@/state/contractContext";
 import { Address } from "viem";
@@ -27,12 +27,11 @@ export default function GamePage({ params: { gameId } }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [isClaimingTimeout, setIsClaimingTimeout] = useState<boolean>(false);
-  const timeout = 10;
   const {
-    contractData: { stake, j1, j2, lastAction },
+    contractData: { stake, j1, j2, lastAction, c2 },
     setContractData,
   } = useContract();
-  const { secondsLeft, minutesLeft, msLeft } = useTimeLeft(lastAction, timeout); // TODO: remove timeout or set to 5
+  const { secondsLeft, minutesLeft, msLeft } = useTimeLeft(lastAction);
 
   const ownAddress = useAddress();
 
@@ -62,7 +61,7 @@ export default function GamePage({ params: { gameId } }: Props) {
     const [account] = await walletClient.getAddresses();
     try {
       setIsClaimingTimeout(true);
-      if (player === 1 || player === 2) {
+      if ((player === 1 || player === 2) && stake) {
         const { request } = await publicClient.simulateContract({
           address: gameId,
           abi: rpsContract.abi,
@@ -70,7 +69,35 @@ export default function GamePage({ params: { gameId } }: Props) {
           account,
         });
 
-        await walletClient.writeContract(request);
+        const txHash = await walletClient.writeContract(request);
+        const receipt = await publicClient.waitForTransactionReceipt({
+          hash: txHash,
+        });
+
+        if (receipt.status === "success") {
+          if (player === 2) {
+            // If j2 claimed timeout successfully, j2 will be the winner, receiving 2*stake
+            toast.success(
+              `Contratulations! You have won the game and will receive ${
+                2 * stake
+              } ETH.`,
+            );
+          } else {
+            // If j1 claimed timeout successfully, there will be no winner, as j2 has not staked any ETH yet
+            toast.success(
+              `Player 2 has timed out. You are getting back your ${stake} ETH.`,
+            );
+          }
+
+          // Get new contract data and update state
+          const newContractData = await getContractData(gameId as Address);
+          setContractData((prevData) => ({
+            ...prevData,
+            ...newContractData,
+          }));
+        } else {
+          toast.error("There has been an error claiming the timeout.");
+        }
       } else {
         toast.error("You are not allowed to claim a timeout.");
       }
@@ -103,7 +130,7 @@ export default function GamePage({ params: { gameId } }: Props) {
       {stake && stake !== 0 ? (
         <header className="flex flex-row justify-between items-center mt-16">
           <CircularProgressbarWithChildren
-            value={msLeft ? (msLeft / (timeout * 60 * 1_000)) * 100 : 100}
+            value={msLeft ? (msLeft / (5 * 60 * 1_000)) * 100 : 100}
             className="h-[100px]"
           >
             {isClaimingTimeout || msLeft === undefined ? (
@@ -121,7 +148,13 @@ export default function GamePage({ params: { gameId } }: Props) {
               </button>
             )}
           </CircularProgressbarWithChildren>
-          <p>Stake: {stake} ETH TODO: show nice UI</p>
+          <p className="flex flex-row gap-2 items-center">
+            {c2 ? "PRIZE" : "STAKE"}
+            <Badge color="green" size="xl">
+              {(c2 ? 2 : 1) * stake}
+            </Badge>
+            ETH
+          </p>
         </header>
       ) : null}
 

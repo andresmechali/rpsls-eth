@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { Address } from "viem";
 import { useParams } from "next/navigation";
-import { useAddress } from "@thirdweb-dev/react";
+import { metamaskWallet, useAddress, useMetamask } from "@thirdweb-dev/react";
 import { getContractData, publicClient, walletClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
 import toast from "react-hot-toast";
 import { useContract } from "@/state/contractContext";
+
+// const metamaskConfig = metamaskWallet();
 
 export default function Player1Screen() {
   const [isSolving, setIsSolving] = useState<boolean>(false);
@@ -20,12 +22,20 @@ export default function Player1Screen() {
     setIsSolving(true);
     try {
       if (ownAddress) {
+        // Retrieve salt and move from sessionStorage
+        const salt = sessionStorage.getItem(`salt-${ownAddress}`);
+        const move = sessionStorage.getItem(`move-${ownAddress}`);
+
+        if (!salt || !move) {
+          throw new Error("Salt or move are missing on sessionStorage");
+        }
+
         const { request } = await publicClient.simulateContract({
           address: gameId as Address,
           abi: rpsContract.abi,
           functionName: "solve",
           account: ownAddress as Address,
-          args: [3, BigInt(123)], // TODO: set proper move and salt
+          args: [Number(move), BigInt(salt)],
         });
 
         const txHash = await walletClient.writeContract(request);
@@ -34,7 +44,6 @@ export default function Player1Screen() {
         });
 
         if (receipt.status === "success") {
-          console.log({ receipt });
           toast.success("Game finished successfully!");
           // Get recent data and update context
           const newContractData = await getContractData(gameId as Address);
@@ -56,7 +65,9 @@ export default function Player1Screen() {
   };
 
   return (
-    <section className="h-full flex flex-col justify-center w-[512px]">
+    <section className="h-full flex flex-col gap-4 justify-center w-[512px]">
+      Player 2 has already played. Please finish the game before the time runs
+      out.
       {!c2 ? (
         <p className="text-center">Waiting for player 2</p>
       ) : (

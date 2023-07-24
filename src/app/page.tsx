@@ -6,6 +6,7 @@ import { isValidAddress } from "ethereumjs-util";
 import { useRouter } from "next/navigation";
 import { createGame } from "@/utils";
 import { Move, MoveOptions } from "@/types";
+import toast from "react-hot-toast";
 
 type Inputs = {
   opponent: string;
@@ -32,20 +33,27 @@ export default function Home() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    // TODO: Validate
-    const { opponent, stake, move } = data;
+    try {
+      // TODO: Validate
+      const { opponent, stake, move } = data;
 
-    if (ownAddress) {
-      // Create game and get contract address
-      const contractAddress = await createGame({
-        ownAddress,
-        opponent,
-        move,
-        stake: stake.toString(),
-      });
+      if (ownAddress) {
+        // Create game and get contract address
+        const contractAddress = await createGame({
+          ownAddress,
+          opponent,
+          move,
+          stake: stake.toString(),
+        });
 
-      // Redirect to game page
-      router.push(`/${contractAddress}`);
+        toast.success("Game created successfully!");
+
+        // Redirect to game page
+        router.push(`/${contractAddress}`);
+      }
+    } catch (e) {
+      console.log(e);
+      toast.error("Error creating game.");
     }
   };
 

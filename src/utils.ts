@@ -13,6 +13,7 @@ import { sepolia } from "viem/chains";
 import rpsContract from "./contracts/RPS.json";
 import { useEffect, useState } from "react";
 import { ContractData, MoveOptions } from "@/types";
+import { randomBytes, randomUUID } from "crypto";
 
 export const walletClient = createWalletClient({
   chain: sepolia,
@@ -38,7 +39,11 @@ export async function createGame({
   move: MoveOptions;
   stake: string;
 }) {
-  const salt = BigInt(123); // TODO: make it random
+  const salt = BigInt(`0x${randomBytes(32).toString("hex")}`);
+  // Store salt and move in sessionStorage
+  // Safety: This is cleared when the browser is closed
+  sessionStorage.setItem(`salt-${ownAddress}`, salt.toString(10));
+  sessionStorage.setItem(`move-${ownAddress}`, move.toString(10));
   const hash: Hex = keccak256(
     encodePacked(["uint8", "uint256"], [move, salt]),
   ) as Hex;

@@ -14,10 +14,10 @@ export default function GameScreen({ player }: { player: 1 | 2 | undefined }) {
   if (!stake) {
     return (
       <div className="flex flex-col gap-4 items-center">
-        <p>Game finished. TODO: show winner.</p>
+        <p>Game finished.</p>
         <button
           className="rounded-md bg-gray-800/50 hover:bg-gray-700/50 p-4"
-          onClick={() => {
+          onClick={async () => {
             router.push("/");
           }}
         >

@@ -77,12 +77,14 @@ export default function Player2Screen() {
 
   if (c2) {
     return (
-      <div className="flex flex-row gap-1">
+      <div className="flex flex-row gap-1 items-center">
         <p>You have already picked</p>
         <span>
-          <Badge color="info">{Object.keys(Move)[c2 - 1]}</Badge>
+          <Badge className="uppercase" color="purple" size="xl">
+            {Object.keys(Move)[c2 - 1]}
+          </Badge>
         </span>
-        <p>Waiting for player 1 to finish the game.</p>
+        <p>. Waiting for player 1 to finish the game.</p>
       </div>
     );
   }
