@@ -1,47 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Address } from "viem";
 import { useParams } from "next/navigation";
 import { useAddress } from "@thirdweb-dev/react";
-import { publicClient, walletClient } from "@/utils";
+import { getContractData, publicClient, walletClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
-import toast, { Toaster } from "react-hot-toast";
+import toast from "react-hot-toast";
+import { useContract } from "@/state/contractContext";
 
 export default function Player1Screen() {
-  const [player2Move, setPlayer2Move] = useState<number>();
   const [isSolving, setIsSolving] = useState<boolean>(false);
   const ownAddress = useAddress();
   const { gameId } = useParams();
-  const [isFinished, setIsFinished] = useState<boolean>(false);
-
-  useEffect(() => {
-    // TODO: turn into hook
-    (async () => {
-      if (gameId) {
-        const c2 = (await publicClient.readContract({
-          address: gameId as Address,
-          abi: rpsContract.abi,
-          functionName: "c2",
-        })) as number;
-        if (c2) {
-          setPlayer2Move(c2);
-        }
-      }
-    })();
-  }, [gameId]);
+  const {
+    contractData: { c2 },
+    setContractData,
+  } = useContract();
 
   const onSolve = async () => {
-    console.log("SOLVE");
     setIsSolving(true);
     try {
-      const [account] = await walletClient.getAddresses();
-
       if (ownAddress) {
         const { request } = await publicClient.simulateContract({
           address: gameId as Address,
           abi: rpsContract.abi,
           functionName: "solve",
-          account,
-          args: [1, BigInt(123)], // TODO: set proper move and salt
+          account: ownAddress as Address,
+          args: [3, BigInt(123)], // TODO: set proper move and salt
         });
 
         const txHash = await walletClient.writeContract(request);
@@ -49,9 +33,18 @@ export default function Player1Screen() {
           hash: txHash,
         });
 
-        console.log({ receipt });
-        setIsFinished(true);
-        toast.success("Game finished successfully!");
+        if (receipt.status === "success") {
+          console.log({ receipt });
+          toast.success("Game finished successfully!");
+          // Get recent data and update context
+          const newContractData = await getContractData(gameId as Address);
+          setContractData((prevData) => ({
+            ...prevData,
+            ...newContractData,
+          }));
+        } else {
+          toast.error("There was an error solving the game.");
+        }
       }
     } catch (e) {
       console.log(e);
@@ -62,20 +55,10 @@ export default function Player1Screen() {
     }
   };
 
-  if (isFinished) {
-    return (
-      <div>
-        Game finished. TODO: instead of this, the stake should be updated to 0
-        and this screen should not be rendered.
-      </div>
-    );
-  }
-
   return (
     <section className="h-full flex flex-col justify-center w-[512px]">
-      <Toaster />
-      {!player2Move ? (
-        <p>Waiting for player 2</p>
+      {!c2 ? (
+        <p className="text-center">Waiting for player 2</p>
       ) : (
         <button
           type="submit"

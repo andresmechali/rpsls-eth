@@ -3,15 +3,13 @@
 import { useRouter } from "next/navigation";
 import Player2Screen from "@/app/[gameId]/Player2Screen";
 import Player1Screen from "@/app/[gameId]/Player1Screen";
+import { useContract } from "@/state/contractContext";
 
-export default function GameScreen({
-  player,
-  stake,
-}: {
-  player: 1 | 2 | undefined;
-  stake?: number;
-}) {
+export default function GameScreen({ player }: { player: 1 | 2 | undefined }) {
   const router = useRouter();
+  const {
+    contractData: { stake },
+  } = useContract();
 
   if (!stake) {
     return (
@@ -49,6 +47,5 @@ export default function GameScreen({
     return <Player1Screen />;
   }
 
-  // TODO
-  return <Player2Screen stake={stake} />;
+  return <Player2Screen />;
 }

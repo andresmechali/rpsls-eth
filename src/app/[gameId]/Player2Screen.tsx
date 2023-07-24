@@ -1,4 +1,3 @@
-import { useEffect, useState } from "react";
 import { Address, parseEther } from "viem";
 import { useParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -6,34 +5,21 @@ import { Badge } from "flowbite-react";
 import toast from "react-hot-toast";
 import { useAddress } from "@thirdweb-dev/react";
 import { Move, MoveOptions } from "@/types";
-import { publicClient, walletClient } from "@/utils";
+import { getContractData, publicClient, walletClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
+import { useContract } from "@/state/contractContext";
 
 type Inputs = {
   move: MoveOptions;
 };
 
-export default function Player2Screen({ stake }: { stake: number }) {
-  const [playerMove, setPlayerMove] = useState<number>();
+export default function Player2Screen() {
   const ownAddress = useAddress();
   const { gameId } = useParams();
-
-  useEffect(() => {
-    (async () => {
-      if (gameId) {
-        console.log("asddasads");
-        toast.success("asd");
-        const c2 = (await publicClient.readContract({
-          address: gameId as Address,
-          abi: rpsContract.abi,
-          functionName: "c2",
-        })) as number;
-        if (c2) {
-          setPlayerMove(c2);
-        }
-      }
-    })();
-  }, [gameId]);
+  const {
+    contractData: { c2, stake },
+    setContractData,
+  } = useContract();
 
   const {
     register,
@@ -48,19 +34,18 @@ export default function Player2Screen({ stake }: { stake: number }) {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    console.log("SUBMIT");
     try {
       const { move } = data;
-      const [account] = await walletClient.getAddresses();
 
       if (ownAddress) {
         const { request } = await publicClient.simulateContract({
-          address: gameId as `0x${string}`,
+          address: gameId as Address,
           abi: rpsContract.abi,
           functionName: "play",
-          account,
+          account: ownAddress as Address,
           args: [move],
-          value: parseEther(stake.toString(10)),
+          // Safety: This component will never render if there is no stake (as per GameScreen logic)
+          value: parseEther(stake!.toString(10)),
         });
 
         const txHash = await walletClient.writeContract(request);
@@ -68,25 +53,36 @@ export default function Player2Screen({ stake }: { stake: number }) {
           hash: txHash,
         });
 
-        setPlayerMove(move);
+        if (receipt.status === "success") {
+          toast.success(
+            `You have successfully picked ${Object.keys(Move)[move - 1]}.`,
+          );
+          console.log({ receipt }); // TODO: remove
 
-        console.log("-----RES-------");
-        console.log({ receipt });
+          // Get recent data and update context
+          const newContractData = await getContractData(gameId as Address);
+          setContractData((prevData) => ({
+            ...prevData,
+            ...newContractData,
+          }));
+        } else {
+          toast.error("There was an error submitting your move.");
+        }
       }
     } catch (e) {
       console.log(e);
-      // TODO: handle error
+      toast.error("There was an error submitting your move.");
     }
   };
 
-  if (playerMove) {
+  if (c2) {
     return (
-      <div>
-        You already chose{" "}
-        <Badge color="info">{Object.keys(Move)[playerMove - 1]}</Badge>
-        {/*<kbd className="px-2 py-1.5 text-xs font-semibold border rounded-lg bg-gray-600 text-gray-100 border-gray-500">*/}
-        {/*  {Object.keys(Move)[playerMove - 1]}*/}
-        {/*</kbd>*/}. Waiting for player 1 to finish the game.
+      <div className="flex flex-row gap-1">
+        <p>You have already picked</p>
+        <span>
+          <Badge color="info">{Object.keys(Move)[c2 - 1]}</Badge>
+        </span>
+        <p>Waiting for player 1 to finish the game.</p>
       </div>
     );
   }
@@ -131,7 +127,7 @@ export default function Player2Screen({ stake }: { stake: number }) {
           className="w-full rounded-lg bg-gray-800 p-4 hover:bg-gray-500 disabled:cursor-not-allowed disabled:hover:bg-gray-800"
           disabled={isSubmitting}
         >
-          {isSubmitting ? "Playing..." : `Play ${stake} ETH`}
+          {isSubmitting ? "Playing..." : `Play (${stake} ETH)`}
         </button>
       </form>
     </section>

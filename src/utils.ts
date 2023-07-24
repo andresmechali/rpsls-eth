@@ -12,7 +12,7 @@ import {
 import { sepolia } from "viem/chains";
 import rpsContract from "./contracts/RPS.json";
 import { useEffect, useState } from "react";
-import { MoveOptions } from "@/types";
+import { ContractData, MoveOptions } from "@/types";
 
 export const walletClient = createWalletClient({
   chain: sepolia,
@@ -43,12 +43,10 @@ export async function createGame({
     encodePacked(["uint8", "uint256"], [move, salt]),
   ) as Hex;
 
-  console.log("create game");
-
   try {
     const txHash = await walletClient.deployContract({
       abi: rpsContract.abi,
-      bytecode: rpsContract.bytecode as `0x{string}`,
+      bytecode: rpsContract.bytecode as Address,
       // ...rpsContract,
       account: ownAddress as Address,
       args: [hash, opponent as Address],
@@ -69,7 +67,7 @@ export async function createGame({
 export function useTimeLeft(lastAction?: number, totalMins?: number) {
   const [secondsLeft, setSecondsLeft] = useState<number>(0);
   const [minutesLeft, setMinutesLeft] = useState<number>(0);
-  const [msLeft, setMsLeft] = useState<number>(0);
+  const [msLeft, setMsLeft] = useState<number>();
 
   const defaultTotalMinutes: number = 5;
   const totalMinutes = totalMins || defaultTotalMinutes;
@@ -95,4 +93,47 @@ export function useTimeLeft(lastAction?: number, totalMins?: number) {
   });
 
   return { secondsLeft, minutesLeft, msLeft };
+}
+
+export async function getContractData(
+  contractAddress: Address,
+): Promise<Partial<ContractData>> {
+  // @ts-ignore
+  const values = await Promise.all<[Address, Address, number, number, number]>([
+    publicClient.readContract({
+      address: contractAddress,
+      abi: rpsContract.abi,
+      functionName: "j1",
+    }),
+    publicClient.readContract({
+      address: contractAddress,
+      abi: rpsContract.abi,
+      functionName: "j2",
+    }),
+    publicClient.readContract({
+      address: contractAddress,
+      abi: rpsContract.abi,
+      functionName: "c2",
+    }),
+    publicClient.readContract({
+      address: contractAddress,
+      abi: rpsContract.abi,
+      functionName: "stake",
+    }),
+    publicClient.readContract({
+      address: contractAddress,
+      abi: rpsContract.abi,
+      functionName: "lastAction",
+    }),
+  ]);
+
+  console.log(values[3]);
+
+  return {
+    j1: values[0],
+    j2: values[1],
+    c2: values[2],
+    stake: Number(values[3]) / 1e18,
+    lastAction: Number(values[4]) * 1_000,
+  };
 }
