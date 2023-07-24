@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import Footer from "@/app/[gameId]/Footer";
 
 export default function GameLayout({ children }: { children: ReactNode }) {
   return (

@@ -17,5 +17,5 @@ export type ContractData = {
   j2?: Address;
   c2?: number;
   stake?: number;
-  lastAction?: number; // TODO: review
+  lastAction?: number;
 };

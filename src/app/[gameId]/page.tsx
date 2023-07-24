@@ -16,10 +16,11 @@ import GameScreen from "@/app/[gameId]/GameScreen";
 import { useContract } from "@/state/contractContext";
 import { Address } from "viem";
 import toast from "react-hot-toast";
+import Game404 from "@/app/[gameId]/404";
 
 type Props = {
   params: {
-    gameId: `0x${string}`;
+    gameId: Address;
   };
 };
 
@@ -49,7 +50,6 @@ export default function GamePage({ params: { gameId } }: Props) {
           }));
         }
       } catch (e) {
-        // TODO: toaster
         setHasError(true);
       } finally {
         setIsLoading(false);
@@ -117,11 +117,7 @@ export default function GamePage({ params: { gameId } }: Props) {
   }
 
   if (hasError) {
-    return (
-      <div className="w-full h-full flex justify-center items-center flex-1">
-        Error loading game. TODO: show nice UI.
-      </div>
-    );
+    return <Game404 gameId={gameId} />;
   }
 
   return (

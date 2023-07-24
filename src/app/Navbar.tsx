@@ -35,8 +35,6 @@ export default function Navbar() {
             HOW TO PLAY
           </Badge>
         </Tooltip>
-
-        {/*  TODO: how to play */}
       </div>
 
       <div className="fixed top-16 flex h-auto items-end lg:static w-full bg-none flex-row justify-end flex-1">

@@ -34,7 +34,6 @@ export default function Home() {
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
     try {
-      // TODO: Validate
       const { opponent, stake, move } = data;
 
       if (ownAddress) {

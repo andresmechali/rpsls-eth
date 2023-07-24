@@ -57,7 +57,6 @@ export default function Player2Screen() {
           toast.success(
             `You have successfully picked ${Object.keys(Move)[move - 1]}.`,
           );
-          console.log({ receipt }); // TODO: remove
 
           // Get recent data and update context
           const newContractData = await getContractData(gameId as Address);

@@ -58,7 +58,6 @@ export default function Player1Screen() {
     } catch (e) {
       console.log(e);
       toast.error("There was an error solving the game.");
-      // TODO: handle error
     } finally {
       setIsSolving(false);
     }

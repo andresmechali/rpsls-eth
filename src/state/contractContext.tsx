@@ -13,7 +13,7 @@ export const ContractContext = createContext<{
   setContractData: Dispatch<SetStateAction<ContractData>>;
 }>({
   contractData: {},
-  setContractData: () => {}, // TODO: review
+  setContractData: () => {},
 });
 
 export function useContract() {
