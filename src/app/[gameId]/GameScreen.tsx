@@ -4,8 +4,9 @@ import { useRouter } from "next/navigation";
 import Player2Screen from "@/app/[gameId]/Player2Screen";
 import Player1Screen from "@/app/[gameId]/Player1Screen";
 import { useContract } from "@/state/contractContext";
+import { Player } from "@/types";
 
-export default function GameScreen({ player }: { player: 1 | 2 | undefined }) {
+export default function GameScreen({ player }: { player: Player }) {
   const router = useRouter();
   const {
     contractData: { stake },

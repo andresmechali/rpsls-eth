@@ -2,7 +2,7 @@ import { Address } from "viem";
 
 declare module RPSTypes {}
 
-export type MoveOptions = 0 | 1 | 2 | 3 | 4 | 5;
+export type MoveOption = 0 | 1 | 2 | 3 | 4 | 5;
 
 export enum Move {
   Rock = "Rock",
@@ -19,3 +19,5 @@ export type ContractData = {
   stake?: number;
   lastAction?: number;
 };
+
+export type Player = 1 | 2 | undefined;

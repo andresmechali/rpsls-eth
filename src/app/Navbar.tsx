@@ -5,6 +5,9 @@ import Link from "next/link";
 import { Toaster } from "react-hot-toast";
 import { Badge, Tooltip } from "flowbite-react";
 import { HiQuestionMarkCircle } from "react-icons/hi";
+import dynamic from "next/dynamic";
+
+const NonSSRTooltip = dynamic(() => Promise.resolve(Tooltip), { ssr: false });
 
 export default function Navbar() {
   return (
@@ -15,7 +18,7 @@ export default function Navbar() {
             Rock Paper Scissors Lizard Spock
           </p>
         </Link>
-        <Tooltip
+        <NonSSRTooltip
           content={
             <div>
               <p>Scissors cuts Paper</p>
@@ -34,7 +37,7 @@ export default function Navbar() {
           <Badge icon={HiQuestionMarkCircle} size="xs">
             HOW TO PLAY
           </Badge>
-        </Tooltip>
+        </NonSSRTooltip>
       </div>
 
       <div className="fixed top-16 flex h-auto items-end lg:static w-full bg-none flex-row justify-end flex-1">

@@ -4,19 +4,24 @@ import { useAddress } from "@thirdweb-dev/react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { isValidAddress } from "ethereumjs-util";
 import { useRouter } from "next/navigation";
-import {
-  createGame,
-  generateSalt,
-  getStoredSaltAndMove,
-  storeSaltAndMove,
-} from "@/utils";
-import { Move, MoveOptions } from "@/types";
+import { generateSalt, publicClient, storeSaltAndMove } from "@/utils";
+import { Move, MoveOption } from "@/types";
 import toast from "react-hot-toast";
-import { Address } from "viem";
+import {
+  Address,
+  createWalletClient,
+  custom,
+  encodePacked,
+  Hex,
+  keccak256,
+  parseEther,
+} from "viem";
+import { sepolia } from "viem/chains";
+import rpsContract from "@/contracts/RPS.json";
 
 type Inputs = {
   opponent: string;
-  move: MoveOptions;
+  move: MoveOption;
   stake: number;
 };
 
@@ -39,33 +44,47 @@ export default function Home() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const salt = generateSalt();
-    console.log("salt:", salt);
-    await storeSaltAndMove(ownAddress! as Address, salt, data.move);
-    const saltAndMove = await getStoredSaltAndMove(ownAddress! as Address);
-    console.log({ saltAndMove });
-    return;
-    // try {
-    //   const { opponent, stake, move } = data;
-    //
-    //   if (ownAddress) {
-    //     // Create game and get contract address
-    //     const contractAddress = await createGame({
-    //       ownAddress,
-    //       opponent,
-    //       move,
-    //       stake: stake.toString(),
-    //     });
-    //
-    //     toast.success("Game created successfully!");
-    //
-    //     // Redirect to game page
-    //     router.push(`/${contractAddress}`);
-    //   }
-    // } catch (e) {
-    //   console.log(e);
-    //   toast.error("Error creating game.");
-    // }
+    // Create game
+    try {
+      const { opponent, stake, move } = data;
+
+      if (ownAddress) {
+        // Generate salt.
+        const salt = generateSalt();
+        // Encrypt salt and move and store locally.
+        await storeSaltAndMove(ownAddress as Address, salt, move);
+        // Generate c1Hash
+        const hash: Hex = keccak256(
+          encodePacked(["uint8", "uint256"], [move, salt]),
+        ) as Hex;
+        // Generate wallet client
+        const walletClient = createWalletClient({
+          chain: sepolia,
+          transport: custom(window.ethereum),
+        });
+        // Deploy contract
+        const txHash = await walletClient.deployContract({
+          abi: rpsContract.abi,
+          bytecode: rpsContract.bytecode as Address,
+          account: ownAddress as Address,
+          args: [hash, opponent as Address],
+          value: parseEther(stake.toString()),
+        });
+        // Wait for transaction to be confirmed
+        const { contractAddress } =
+          await publicClient.waitForTransactionReceipt({
+            hash: txHash,
+          });
+
+        toast.success("Game created successfully!");
+
+        // Redirect to game page
+        router.push(`/${contractAddress}`);
+      }
+    } catch (e) {
+      console.log(e);
+      toast.error("Error creating game.");
+    }
   };
 
   return (

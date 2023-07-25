@@ -1,16 +1,19 @@
-import { Address, parseEther } from "viem";
+"use client";
+
+import { Address, createWalletClient, custom, parseEther } from "viem";
 import { useParams } from "next/navigation";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { Badge } from "flowbite-react";
 import toast from "react-hot-toast";
 import { useAddress } from "@thirdweb-dev/react";
-import { Move, MoveOptions } from "@/types";
-import { getContractData, publicClient, walletClient } from "@/utils";
+import { Move, MoveOption } from "@/types";
+import { getContractData, publicClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
 import { useContract } from "@/state/contractContext";
+import { sepolia } from "viem/chains";
 
 type Inputs = {
-  move: MoveOptions;
+  move: MoveOption;
 };
 
 export default function Player2Screen() {
@@ -48,6 +51,11 @@ export default function Player2Screen() {
           value: parseEther(stake!.toString(10)),
         });
 
+        const walletClient = createWalletClient({
+          chain: sepolia,
+          transport: custom(window.ethereum),
+        });
+
         const txHash = await walletClient.writeContract(request);
         const receipt = await publicClient.waitForTransactionReceipt({
           hash: txHash,
@@ -77,7 +85,7 @@ export default function Player2Screen() {
   if (c2) {
     return (
       <div className="flex flex-row gap-1 items-center">
-        <p>You have already picked</p>
+        <p>You have picked</p>
         <span>
           <Badge className="uppercase" color="purple" size="xl">
             {Object.keys(Move)[c2 - 1]}

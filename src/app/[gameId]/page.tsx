@@ -2,21 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useAddress } from "@thirdweb-dev/react";
-import {
-  getContractData,
-  publicClient,
-  useTimeLeft,
-  walletClient,
-} from "@/utils";
+import { getContractData, publicClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
 import { Badge, Spinner } from "flowbite-react";
 import GameScreen from "@/app/[gameId]/GameScreen";
 import { useContract } from "@/state/contractContext";
-import { Address } from "viem";
+import { Address, createWalletClient, custom } from "viem";
 import toast from "react-hot-toast";
 import Game404 from "@/app/[gameId]/404";
+import { sepolia } from "viem/chains";
+import { useTimeLeft } from "@/app/hooks/useTimeLeft";
 
 type Props = {
   params: {
@@ -58,6 +55,10 @@ export default function GamePage({ params: { gameId } }: Props) {
   }, [gameId, setContractData]);
 
   const claimTimeout = async () => {
+    const walletClient = createWalletClient({
+      chain: sepolia,
+      transport: custom(window.ethereum),
+    });
     const [account] = await walletClient.getAddresses();
     try {
       setIsClaimingTimeout(true);

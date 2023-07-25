@@ -1,3 +1,5 @@
+"use client";
+
 import { Address } from "viem";
 import { useRouter } from "next/navigation";
 
