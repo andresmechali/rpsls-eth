@@ -37,9 +37,9 @@ export default function Home() {
     mode: "onSubmit",
     reValidateMode: "onChange",
     defaultValues: {
-      opponent: "0x8b7E9A21B92196F72722dbFeDb1406F86E737061",
+      opponent: "",
       move: 0,
-      stake: 0.001,
+      stake: 0,
     },
   });
 
