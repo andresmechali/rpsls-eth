@@ -90,9 +90,23 @@ export default function Player1Screen() {
   return (
     <section className="h-full flex flex-col gap-4 justify-center w-[512px]">
       {!c2 ? (
-        <p className="text-center">
-          You have already picked. Waiting for player 2.
-        </p>
+        <div className="flex flex-col gap-4">
+          <p>You have already picked. Waiting for player 2.</p>
+          <input
+            type="text"
+            placeholder={typeof window === "undefined" ? "" : "Copy game url"}
+            readOnly
+            className="block w-full border cursor-pointer bg-gray-50 border-gray-300 text-gray-900 focus:border-cyan-500 focus:ring-cyan-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-cyan-500 dark:focus:ring-cyan-500 p-3.5 text-sm pr-10 rounded-lg"
+            onClick={async () => {
+              if (typeof window !== "undefined") {
+                await navigator.clipboard.writeText(window.location.href);
+                toast.success("Address copied! Send it to your opponent.", {
+                  duration: 3000,
+                });
+              }
+            }}
+          />
+        </div>
       ) : (
         <div className="flex flex-col gap-4">
           <p>
