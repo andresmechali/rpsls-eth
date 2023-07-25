@@ -1,7 +1,7 @@
 # Rock, Paper, Scissors, Lizard, Spock on Ethereum
 ***
 
-This is a technical assignment (D) for [Kleros](https://kleros.io/).
+This is a technical assignment (D) for [Kleros](https://kleros.io/). It needs to use the `SEPOLIA` network.
 
 ## Run locally
 
