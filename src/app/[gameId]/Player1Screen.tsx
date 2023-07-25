@@ -1,13 +1,16 @@
 import { useState } from "react";
 import { Address } from "viem";
 import { useParams } from "next/navigation";
-import { metamaskWallet, useAddress, useMetamask } from "@thirdweb-dev/react";
-import { getContractData, publicClient, walletClient } from "@/utils";
+import { useAddress } from "@thirdweb-dev/react";
+import {
+  getContractData,
+  getStoredSaltAndMove,
+  publicClient,
+  walletClient,
+} from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
 import toast from "react-hot-toast";
 import { useContract } from "@/state/contractContext";
-
-// const metamaskConfig = metamaskWallet();
 
 export default function Player1Screen() {
   const [isSolving, setIsSolving] = useState<boolean>(false);
@@ -22,13 +25,10 @@ export default function Player1Screen() {
     setIsSolving(true);
     try {
       if (ownAddress) {
-        // Retrieve salt and move from sessionStorage
-        const salt = sessionStorage.getItem(`salt-${ownAddress}`);
-        const move = sessionStorage.getItem(`move-${ownAddress}`);
-
-        if (!salt || !move) {
-          throw new Error("Salt or move are missing on sessionStorage");
-        }
+        // Retrieve salt and move from sessionStorage. These are stored encrypted.
+        const { salt, move } = await getStoredSaltAndMove(
+          ownAddress as Address,
+        );
 
         const { request } = await publicClient.simulateContract({
           address: gameId as Address,

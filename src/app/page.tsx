@@ -4,9 +4,15 @@ import { useAddress } from "@thirdweb-dev/react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { isValidAddress } from "ethereumjs-util";
 import { useRouter } from "next/navigation";
-import { createGame } from "@/utils";
+import {
+  createGame,
+  generateSalt,
+  getStoredSaltAndMove,
+  storeSaltAndMove,
+} from "@/utils";
 import { Move, MoveOptions } from "@/types";
 import toast from "react-hot-toast";
+import { Address } from "viem";
 
 type Inputs = {
   opponent: string;
@@ -33,27 +39,33 @@ export default function Home() {
   });
 
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    try {
-      const { opponent, stake, move } = data;
-
-      if (ownAddress) {
-        // Create game and get contract address
-        const contractAddress = await createGame({
-          ownAddress,
-          opponent,
-          move,
-          stake: stake.toString(),
-        });
-
-        toast.success("Game created successfully!");
-
-        // Redirect to game page
-        router.push(`/${contractAddress}`);
-      }
-    } catch (e) {
-      console.log(e);
-      toast.error("Error creating game.");
-    }
+    const salt = generateSalt();
+    console.log("salt:", salt);
+    await storeSaltAndMove(ownAddress! as Address, salt, data.move);
+    const saltAndMove = await getStoredSaltAndMove(ownAddress! as Address);
+    console.log({ saltAndMove });
+    return;
+    // try {
+    //   const { opponent, stake, move } = data;
+    //
+    //   if (ownAddress) {
+    //     // Create game and get contract address
+    //     const contractAddress = await createGame({
+    //       ownAddress,
+    //       opponent,
+    //       move,
+    //       stake: stake.toString(),
+    //     });
+    //
+    //     toast.success("Game created successfully!");
+    //
+    //     // Redirect to game page
+    //     router.push(`/${contractAddress}`);
+    //   }
+    // } catch (e) {
+    //   console.log(e);
+    //   toast.error("Error creating game.");
+    // }
   };
 
   return (

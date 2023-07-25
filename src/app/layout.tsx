@@ -17,7 +17,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <ThirdwebProvider theme="dark" activeChain={Sepolia}>
+        <ThirdwebProvider
+          theme="dark"
+          activeChain={Sepolia}
+          clientId={process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID}
+        >
           <ContractProvider>
             <main className="flex min-h-screen flex-col items-center p-16 max-w-[1500px] ml-auto mr-auto">
               <Navbar />

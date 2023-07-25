@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@metamask/eth-sig-util": "^6.0.0",
     "@thirdweb-dev/react": "^3.14.20",
     "@thirdweb-dev/sdk": "^3.10.40",
     "@types/node": "20.4.2",
