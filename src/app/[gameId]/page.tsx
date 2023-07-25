@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAddress } from "@thirdweb-dev/react";
+import { useAddress, useChain } from "@thirdweb-dev/react";
 import { getContractData, publicClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
@@ -25,15 +25,23 @@ export default function GamePage({ params: { gameId } }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [isClaimingTimeout, setIsClaimingTimeout] = useState<boolean>(false);
+  const [isWrongChain, setIsWrongChain] = useState<boolean>(false);
   const {
     contractData: { stake, j1, j2, lastAction, c2 },
     setContractData,
   } = useContract();
   const { secondsLeft, minutesLeft, msLeft } = useTimeLeft(lastAction);
+  const chain = useChain();
 
   const ownAddress = useAddress();
 
   const player = ownAddress === j1 ? 1 : ownAddress === j2 ? 2 : undefined;
+
+  useEffect(() => {
+    if (chain) {
+      setIsWrongChain(chain.name !== "Sepolia");
+    }
+  }, [chain]);
 
   useEffect(() => {
     (async () => {
@@ -121,6 +129,14 @@ export default function GamePage({ params: { gameId } }: Props) {
     return <Game404 gameId={gameId} />;
   }
 
+  if (isWrongChain) {
+    return (
+      <div className="w-full h-full flex justify-center items-center flex-1">
+        Please switch to Sepolia
+      </div>
+    );
+  }
+
   return (
     <section className="w-full flex flex-col justify-between flex-1">
       {/* Game information */}
@@ -155,7 +171,7 @@ export default function GamePage({ params: { gameId } }: Props) {
         </header>
       ) : null}
 
-      <main className="flex flex-1 items-center justify-center">
+      <main className="flex flex-1 items-center justify-center w-[512px]">
         <GameScreen player={player} />
       </main>
     </section>
