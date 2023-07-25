@@ -1,32 +1,11 @@
 "use client";
 
-import {
-  Address,
-  createPublicClient,
-  createWalletClient,
-  custom,
-  encodePacked,
-  Hex,
-  http,
-  keccak256,
-  parseEther,
-  WalletClient,
-} from "viem";
+import { Address, createPublicClient, http } from "viem";
 import { sepolia } from "viem/chains";
 import rpsContract from "./contracts/RPS.json";
-import { useEffect, useState } from "react";
 import { ContractData, MoveOption, Player } from "@/types";
 import { randomBytes } from "crypto";
 import { encrypt, EthEncryptedData } from "@metamask/eth-sig-util";
-
-// const isClient = typeof window !== "undefined";
-
-// export const walletClient = createWalletClient({
-//   chain: sepolia,
-//   // transport: isClient ? custom(window.ethereum) : http(),
-//   transport: custom(window.ethereum),
-//   // transport: http(),
-// });
 
 export const publicClient = createPublicClient({
   chain: sepolia,
