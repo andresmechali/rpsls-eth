@@ -153,5 +153,5 @@ export function getWinner(move1: MoveOption, move2: MoveOption): Player {
   if (move1 % 2 === move2 % 2) {
     return move1 < move2 ? 1 : 2;
   }
-  return move1 > move2 ? 2 : 1;
+  return move1 > move2 ? 1 : 2;
 }
