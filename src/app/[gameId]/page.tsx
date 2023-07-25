@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAddress, useChain } from "@thirdweb-dev/react";
+import { useAddress } from "@thirdweb-dev/react";
 import { getContractData, publicClient } from "@/utils";
 import rpsContract from "@/contracts/RPS.json";
 import { CircularProgressbarWithChildren } from "react-circular-progressbar";
@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import Game404 from "@/app/[gameId]/404";
 import { sepolia } from "viem/chains";
 import { useTimeLeft } from "@/app/hooks/useTimeLeft";
+import useIsWrongChain from "@/app/hooks/useIsWrongChain";
 
 type Props = {
   params: {
@@ -25,23 +26,16 @@ export default function GamePage({ params: { gameId } }: Props) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [hasError, setHasError] = useState<boolean>(false);
   const [isClaimingTimeout, setIsClaimingTimeout] = useState<boolean>(false);
-  const [isWrongChain, setIsWrongChain] = useState<boolean>(false);
   const {
     contractData: { stake, j1, j2, lastAction, c2 },
     setContractData,
   } = useContract();
   const { secondsLeft, minutesLeft, msLeft } = useTimeLeft(lastAction);
-  const chain = useChain();
+  const isWrongChain = useIsWrongChain();
 
   const ownAddress = useAddress();
 
   const player = ownAddress === j1 ? 1 : ownAddress === j2 ? 2 : undefined;
-
-  useEffect(() => {
-    if (chain) {
-      setIsWrongChain(chain.name !== "Sepolia");
-    }
-  }, [chain]);
 
   useEffect(() => {
     (async () => {

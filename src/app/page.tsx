@@ -18,6 +18,7 @@ import {
 } from "viem";
 import { sepolia } from "viem/chains";
 import rpsContract from "@/contracts/RPS.json";
+import useIsWrongChain from "@/app/hooks/useIsWrongChain";
 
 type Inputs = {
   opponent: string;
@@ -28,6 +29,7 @@ type Inputs = {
 export default function Home() {
   const ownAddress = useAddress();
   const router = useRouter();
+  const isWrongChain = useIsWrongChain();
 
   const {
     register,
@@ -86,6 +88,14 @@ export default function Home() {
       toast.error("Error creating game.");
     }
   };
+
+  if (isWrongChain) {
+    return (
+      <div className="w-full h-full flex justify-center items-center flex-1">
+        Please switch to Sepolia
+      </div>
+    );
+  }
 
   return (
     <section className="h-full flex flex-col flex-1 justify-center w-[512px]">
