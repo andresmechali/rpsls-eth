@@ -1,5 +1,4 @@
 # Rock, Paper, Scissors, Lizard, Spock on Ethereum
-***
 
 This is a technical assignment (D) for [Kleros](https://kleros.io/). It needs to use the `SEPOLIA` network.
 
@@ -62,14 +61,14 @@ respectively. Also, let's say that the rewards are `1` for winning, `0` for tiei
 The expected value for picking `rock` is then:
 
 ```
-R = a*0 + b*(-1) + c*1 + d*1 + (1-a-b-c-d)*(-1) = a + 2c +2d - 1
+R = a*0 + b*(-1) + c*1 + d*1 + (1 - a - b - c - d)*(-1) = a + 2c + 2d - 1
 ```
 
 Similarly,
 ```
-P = 1 - b -2c
+P = 1 - b - 2c
 S = 2b + c + 2d - 1
-L = -2a -2c -d + 1
+L = -2a - 2c - d + 1
 K = a - b + c - d
 ```
 
