@@ -15,6 +15,15 @@ cd rpsls-eth
 npm install
 ```
 
+You will need to set a `.env` file in order to be able to use the app locally. Create this file in the root 
+folder and add the following values:
+```dotenv
+NEXT_PUBLIC_INFURA_KEY=your-infura-api-key
+NEXT_PUBLIC_THIRDWEB_CLIENT_ID=your-thirdweb-client-id-here
+```
+To get the ThirdWeb client ID, you need to obtain an API key from the [Thirdweb's dashboard](https://thirdweb.com/dashboard). This is needed as, for simplicity, this project is using ThirdWeb's `<ConnetWallet />` component (for the wallet's button).
+As for Infura, the API key can be obtained from its own [dashboard](https://app.infura.io/dashboard). This is necessary as the project is using Infura's JSON-RPC to connect to Sepolia.
+
 Finally, run the development server:
 
 ```bash

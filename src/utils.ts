@@ -12,7 +12,6 @@ export const publicClient = createPublicClient({
   transport: http(
     `https://sepolia.infura.io/v3/${process.env.NEXT_PUBLIC_INFURA_KEY}`,
   ),
-  // transport: http(),
 });
 
 /**
